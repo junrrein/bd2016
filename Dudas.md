@@ -20,3 +20,6 @@
 
 * Cuando hay relaciones de composición encadenadas (como en el ejercicio sala -> sector -> seccion) y se usan claves de negocio, sala ¿va a tener los identificadores de todas las tablas de la cadena?
 
+## Restricciones
+
+* Interacción entre PKs y Unique Constraints. ¿Se puede repetir un valor de la columna marcada como Unique si la PK no se repite? Si no se puede, ¿cómo hago para que se pueda? (Lo queremos hacer en Tema 2 - Ejercicio 3 - Tabla asignación)
