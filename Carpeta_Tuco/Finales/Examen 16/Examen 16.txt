@@ -1,0 +1,39 @@
+--drop proc sp_minni
+CREATE PROC sp_minni
+@cant int
+AS
+	 DECLARE @variable varchar(20)
+	 
+	 declare cur1 cursor
+	 for
+		select name
+		from sysobjects
+		where type = 'u'
+		
+	
+	
+	open cur1
+	fetch next
+	from cur1
+	into @variable
+	
+	while (@@FETCH_STATUS= 0)
+	begin
+		--ASI NO ANDA:
+		--select top (@cant) *
+		--from @variable
+		--*********
+
+		declare @temp varchar(256) 
+		set @temp='select top ' + convert(varchar,@cant) + ' * from ' + @variable
+		exec (@temp)
+		
+		fetch next
+		from cur1
+		into @variable
+	end
+	close cur1
+	deallocate cur1
+return 	
+		
+exec sp_minni	4

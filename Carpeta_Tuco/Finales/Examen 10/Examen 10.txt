@@ -1,0 +1,7 @@
+UPDATE PRODUCTO 
+SET descripcion = (SELECT descripcion
+		   FROM  Producto P
+    		   WHERE descripcion IS NOT NULL
+				AND
+			substring(P.item,1,4) = substring(item,1,4))
+WHERE descripcion IS NULL

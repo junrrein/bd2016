@@ -1,0 +1,55 @@
+************EJERCICIO 1*************
+
+BEGIN TRANSACTION
+DECLARE @ID varchar(20),
+	@avg float,
+	@condicion varchar(20),
+	@saldo float,
+
+DECLARE cur CURSOR
+FOR
+	SELECT CodCli, saldo, condIVA
+	FROM Cliente
+
+OPEN cur
+FETCH next
+FROM cur
+INTO @ID, @saldo, @condicion
+
+WHILE (@@fetch_status = 0)
+begin
+	IF(@saldo <(SELECT AVG(Saldo) FROM Cliente WHERE @condicion = condIVA)
+	begin
+		DELETE Detalle
+		WHERE NumFact = (SELECT NumFact FROM Factura WHERE @ID = CodCli)
+
+		DELETE Factura
+		WHERE CodCli = @ID
+		
+		DELETE Cliente
+		WHERE CodCli = @ID
+	end
+	
+	FETCH NEXT
+	FROM cur
+	INTO @ID,@saldo,@condicion
+end
+
+DEAlLOCATE cur
+
+IF @@ERROR=0
+	commit transaction
+ELSE
+	rollback transaction 
+		
+************EJERCICIO 2*************
+
+SELECT Saldo
+FROM Cliente C
+INNER JOIN Factura F
+	ON F.CodCli = C.CodCli
+INNER JOIN Detalle D
+	ON D.NumFact = F.NumFact
+GROUP BY C.CodCli
+HAVING count(Distinct D.CodArt) >= (SELECT A.Count(CodArt)
+			   FROM Articulo A)	

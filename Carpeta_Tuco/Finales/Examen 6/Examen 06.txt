@@ -1,0 +1,15 @@
+***********EJERCICIO 1*****************
+SELECT T.title_id, SUM (CASE YEAR(ord_date)  WHEN 1992 THEN qty ELSE 0 END) "Venta 1992",
+		   SUM (CASE YEAR(ord_date)  WHEN 1993 THEN qty ELSE 0 END) "Venta 1993",
+		   SUM (CASE YEAR(ord_date)  WHEN 1994 THEN qty ELSE 0 END) "Venta 1994"
+FROM titles T
+INNER JOIN Sales S
+	ON S.title_id = T.title_id
+GROUP BY T.title_id
+************************otra forma*********
+SELECT S.title_id, SUM (CASE YEAR(ord_date)  WHEN 1992 THEN qty ELSE 0 END) "Venta 1992",
+		   SUM (CASE YEAR(ord_date)  WHEN 1993 THEN qty ELSE 0 END) "Venta 1993",
+		   SUM (CASE YEAR(ord_date)  WHEN 1994 THEN qty ELSE 0 END) "Venta 1994"
+FROM sales S
+
+GROUP BY S.title_id

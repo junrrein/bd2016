@@ -1,0 +1,72 @@
+**********EJERCICIO 1*************
+---PRIMERA FORMA
+
+CREATE PROC sp_publicacion
+(@title_id varchar(7))
+AS
+	IF(@title_id IN (SELECT title_id
+			 FROM titles)
+	begin
+		DELETE TABLE titles
+		WHERE title_id = @title_id
+
+		IF(@@ERROR = 0)
+		begin 
+			INSERT INTO Auditoria
+			VALUES('004',USER,CURRENT_TIMESTAMP)
+		end
+		ELSE
+		begin
+			INSERT INTO #temporal
+			VALUES(@@ERROR,USER,CURRENT_TIMESTAMP,@@SPID)
+		end
+return
+
+
+---SEGUNDA FORMA
+
+CREATE PROC Ejer1
+(@title_id varchar(5))
+AS
+	
+	IF (EXISTS (SELECT title_id
+			  FROM titles
+			  WHERE @title_id = title_id))
+	begin -- si existe el codigo
+		BEGIN TRANSACTION
+		DELETE titles
+		WHERE @title_id = title_id
+		INSERT INTO Auditoria
+		VALUES ('004',USER, CURRENT_TIMESTAMP)
+		IF (@@ERROR = 0) 
+			COMMIT TRANSACTION
+		ELSE
+			ROLLBACK TRANSACTION
+	end
+	ELSE -- si el codigo no existe
+	begin 
+		SELECT title
+		FROM titles
+		WHERE substring(@title_id, 1,2) = substring(title_id, 1,2)
+	end
+	IF (@@ERROR != 0)
+	begin
+		INSERT INTO #temporal
+		VALUES (@@ERROR, USER, CURRENT_TIMESTAMP, @@SPID)
+	end
+
+********EJERCICIO 2***********
+
+CREATE TRIGGER triEJER2
+ON Auditoria
+FOR insert
+AS
+	INSERT INTO Auditoria
+	VALUES ('004',USER, CURRENT_TIMESTAMP)
+
+***********EJERCICIO 3***********
+
+SELECT puntaje'Puntaje',count(id) 'Empleados',  count(id)*100/( SELECT count(ID) 
+								FROM empleado) 'Porc.Sobre el total'
+FROM empleado
+GROUP BY puntaje

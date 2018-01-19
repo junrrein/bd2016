@@ -1,0 +1,33 @@
+*********EJERCICIO 1***********
+
+SELECT Descrip, SUM(CASE A.OpcCoop WHEN 1 then 1 else 0 end) 'Cuota 7',
+		SUM(CASE A.OpcCoop WHEN 2 then 1 else 0 end) 'Cuota 10',
+		SUM(CASE A.OpcCoop WHEN 3 then 1 else 0 end) 'Cuota 15',
+		SUM(CASE A.OpcCoop WHEN 4 then 1 else 0 end) 'Cuota 70',
+		SUM(CASE A.OpcCoop WHEN null then 1 else 0 end) 'No Paga',
+		count(*) 'Total'
+FROM Facultad F
+INNER JOIN Carrera C
+	ON F.ID = C.IDFacultad
+INNER JOIN InsCarrera IC
+	ON C.IDInsCarrera = IC.ID
+INNER JOIN Aspirante A
+	ON A.ID = IC.IDAsp
+GROUP BY F.Descrip
+
+
+
+*********EJERCICIO 3***********
+
+SELECT S.Descrip
+FROM Sucursal S
+INNER JOIN Deposito D
+	ON S.IDSucursal = D.IDSucursal
+INNER JOIN DepProd DP
+	ON D.IDDposito = DP.IDDeposito
+GROUP BY S.IDSucursal
+HAVING sum(DP.Cant) >   (SELECT sum(LP.Cant)
+			 FROM LocalProd LP
+			 INNER JOIN LV
+				ON LP.IDLocal = LV.IDLocal
+			 WHERE S.IDSucursal = LV.IDSucursal)

@@ -1,0 +1,237 @@
+/***********EJERCICIO 1*****************/
+/*drop table Titulos
+drop table EstadEditoriales
+drop table #Temporal
+
+CREATE TABLE Titulos
+(
+	id Integer NOT NULL,
+	titulo varchar(70) NOT NULL,
+	editorial varchar(40) NOT NULL,
+	ciudad varchar(20) NOT NULL,
+	provincia char(2) NOT NULL,
+	pais varchar(30) NOT NULL
+)
+
+CREATE TABLE EstadEditoriales
+(
+	id Integer NOT NULL,
+	pubname varchar(250) NOT NULL,
+	cantPublicaciones int NOT NULL,
+	MontoVenta float NOT NULL,
+	PorcentajeVenta float,
+	PrecioMaximo float,
+	PrecioMinimo float
+)
+
+CREATE TABLE #temporal
+(
+	codigoError smallint,
+	nombreUsuario varchar(100),
+	FechaHora	datetime
+)
+
+*/
+---PARA LA TABLA Titulos
+DECLARE @ID INT,
+		@Titulo varchar(20),
+		@Editorial varchar(40),
+		@Ciudad	varchar(20),
+		@Provincia	char(2),
+		@Pais	varchar(30)
+SET @ID = 1
+
+DECLARE cur1 CURSOR
+FOR
+	SELECT title,P.pub_name, P.city,P.state,P.country
+	FROM titles T
+	INNER JOIN Publishers P
+		ON T.pub_id = P.pub_id
+
+OPEN cur1
+
+FETCH NEXT
+FROM cur1
+INTO @Titulo,@Editorial,@Ciudad,@Provincia,@Pais
+
+WHILE(@@FETCH_STATUS = 0)
+begin
+	BEGIN TRANSACTION
+	INSERT INTO Titulos
+		VALUES(@ID,@Titulo,@Editorial,@Ciudad,@Provincia,@Pais)
+
+	IF(@@ERROR = 0) COMMIT TRANSACTION
+	ELSE
+	begin
+		INSERT INTO #Temporal	VALUES(@@ERROR,USER,CURRENT_TIMESTAMP)
+	END
+
+	SET @ID = @ID+1
+
+	FETCH NEXT
+	FROM cur1
+	INTO @Titulo,@Editorial,@Ciudad,@Provincia,@Pais
+end
+
+CLOSE cur1
+DEALLOCATE cur1
+
+
+--PARA LA TABLA EstadEditoriales
+DECLARE @pub_name varchar(250),
+		@cantidad int,
+		@montoVentas float,
+		@porcentajeVentas	float,
+		@PrecioMax	float,
+		@PreMin		float
+
+SET @ID = 1
+
+DECLARE cur2 CURSOR
+FOR
+	SELECT pub_name , sum(qty),sum(qty*price),(sum(qty*price)*100)/(SELECT  sum(qty*price)			
+																		FROM publishers P 
+																		INNER JOIN titles T
+																			ON T.pub_id = P.pub_id
+																		INNER JOIN Sales S
+																			ON S.title_id = T.title_id),
+																		
+																		 max(price), min(price)
+	FROM publishers P 
+	INNER JOIN titles T
+		ON T.pub_id = P.pub_id
+	INNER JOIN Sales S
+		ON S.title_id = T.title_id
+
+	GROUP BY pub_name
+
+OPEN cur2
+
+FETCH NEXT
+FROM cur2
+INTO @pub_name,@cantidad,@montoVentas,@porcentajeVentas,@PrecioMax,@PreMin	
+
+WHILE(@@FETCH_STATUS = 0)
+begin
+	BEGIN TRANSACTION
+	INSERT INTO EstadEditoriales
+		VALUES(@ID,@pub_name,@cantidad,@montoVentas,@porcentajeVentas,@PrecioMax,@PreMin)
+
+	IF(@@ERROR = 0) COMMIT TRANSACTION
+	ELSE
+	begin
+		INSERT INTO #Temporal	VALUES(@@ERROR,USER,CURRENT_TIMESTAMP)
+	END
+
+	SET @ID = @ID+1
+
+	FETCH NEXT
+	FROM cur2
+	INTO @pub_name,@cantidad,@montoVentas,@porcentajeVentas,@PrecioMax,@PreMin	
+end
+
+CLOSE cur2
+DEALLOCATE cur2
+
+
+
+
+
+
+
+/************EJERCIO2*******************/
+/*select db_name()
+
+CREATE TABLE Localidad2
+(
+	CP			varchar(4)	NOT NULL,
+	Descrip		varchar(20)	NOT NULL
+	Constraint PK_CP	PRIMARY KEY(CP)
+)
+	
+CREATE TABLE Cliente2
+(
+	IDCliente		int		identity(1,1),
+	ApeNom		varchar(20)	NOT NULL,
+	Domic		Varchar(20)	NOT NULL,
+	Tel			varchar(20)	NOT NULL,
+	CP			varchar(4)	NOT NULL,
+	Constraint PK_IDCliente	PRIMARY KEY(IDCliente),
+	Constraint FK_CP	FOREIGN KEY (CP) REFERENCES Localidad2(CP)
+)
+
+CREATE TABLE Articulo2
+(	
+	IDArt		int		identity(1,1),
+	Descrip		varchar(20)	NOT NULL,
+	Precio		money	NOT NULL,
+	Constraint PK_Articulo2 PRIMARY KEY(IDArt)
+)
+
+CREATE TABLE Factura2
+(
+	IDFact		int		identity(1,1),
+	IDCliente	int		NOT NULL,
+	Fecha		datetime NOT NULL,
+	Constraint PK_IDFactura	PRIMARY KEY(IDFact),
+	Constraint FK_IDCliente	FOREIGN KEY (IDCliente) REFERENCES Cliente2(IDCliente)
+)
+
+
+
+
+CREATE TABLE Detalle2
+(	
+	IDFact		int		NOT NULL,
+	IDArt		int		NOT NULL,
+	Cant		int		NULL,
+	Constraint PK_Factura_Arti	PRIMARY KEY(IDFact,IDArt),
+	Constraint FK_Factura	FOREIGN KEY(IDFact)	REFERENCES Factura2(IDFact),
+	Constraint FK_Arti	FOREIGN KEY(IDArt)	REFERENCES Articulo2(IDArt)
+)
+
+
+
+
+Insert INTO Localidad2 VALUES(3000,'Santa Fe')
+Insert INTO Localidad2 VALUES(3142,'Bovril')
+
+Insert INTO Cliente2 VALUES('Victor','El Pozo','111111','3000')
+Insert INTO Cliente2 VALUES('Alejandro','La Rivera','222222','3142')
+
+
+Insert INTO Factura2 VALUES(1,2013-05-23)
+Insert INTO Factura2 VALUES(2,2013-05-23)
+
+
+
+Insert INTO Detalle2 VALUES(1,1,500)
+Insert INTO Detalle2 VALUES(2,2,400)
+Insert INTO Detalle2 VALUES(2,3,400)
+
+
+Insert INTO Articulo2 VALUES('Laptop',3500)
+Insert INTO Articulo2 VALUES('Resma 500',40)
+Insert INTO Articulo2 VALUES('Printer',1000)
+*/
+
+
+------------------------------
+SELECT F.IDFAct, sum(precio*cant)
+FROM Factura2	F
+INNER JOIN Detalle2 D
+	ON F.IDFact = D.IDFact
+INNER JOIN Articulo2 A
+	ON D.IDArt = A.IDArt
+GROUP BY F.IDFact
+HAVING SUM(precio*cant) <( SELECT SUM(Precio*cant)
+							FROM Cliente2 CC
+							INNER JOIN Factura2 FF
+								ON FF.IDCliente = CC.IDCliente
+							INNER JOIN Detalle2 DD
+								ON DD.IDFact = FF.IDFact
+							INNER JOIN Articulo2 AA
+								ON AA.IDArt = DD.IDArt
+							
+							WHERE CC.IDCliente = 2
+						)

@@ -1,0 +1,36 @@
+*******EJERCICIO 1*********
+--no se si esta bien! no se me ocurrio de otra forma
+
+--Ordeno por fecha de muerte y devuelvo la 4º del ID que pasé por parametro si
+--tiene 4 o mas reencarnaciones del tipo animal=2
+
+CREATE PROC sp_alama
+( @ID smallint)
+AS
+	SELECT TOP 4 max(E.FechaMuerte), E.FechaNacimiento
+	FROM Encarnacion E
+	WHERE @ID = IDAlma
+		and
+		4 <= (SELECT count(*)
+	       	      FROM TipoEncarnacion TE
+	 	      WHERE E.IDTipoEncarnacion = TE.IDTipoEncarnacion
+				and
+			   TE.TipoEncarnacion = 2)
+
+	ORDER BY E.FechaMuerte ASC
+
+
+********EJERCICIO 2********
+--En la subconsulta devuelvo los ID de las areas que tienen boxes con 
+--superficies mayores a 10, entonces si la area de la consulta general
+--no pertenece a éstas, muestro
+
+SELECT B.IDBOX, B.IDArea, B.IDCategoria, B.Superficie
+FROM Box B
+WHERE B.IDAre NOT IN (  SELECT IDArea
+			FROM Box BB
+			WHERE BB.Superficie > 10)
+
+
+
+

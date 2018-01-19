@@ -1,0 +1,126 @@
+************EJERCICIO 1****************
+/*CREATE TABLE TitlesNuevos
+(
+	id		int,
+	title	varchar(80)	NOT NULL,
+	type	varchar(12)	NOT NULL	DEFAULT('UNDECIDED'),
+	pub_id	char(4)		NULL		REFERENCES publishers(pub_id),
+	price	money		NULL,
+	pubdate	datetime	NOT NULL	DEFAULT	(getdate()),
+	au_id1	varchar(11)	NOT NULL,
+	aud_id2	varchar(11)	NULL,
+	au_id3	varchar(11)	NULL
+)
+*/
+
+DECLAR	@id		int,
+		@title	varchar(80),
+		@type	varchar(12),
+		@pub_id	char(4),
+		@price	money,
+		@pubdate	datetime,
+		@au_id1	varchar(11),
+		@aud_id2	varchar(11),
+		@au_id3	varchar(11)
+
+DECLARE CUR1 CURSOR
+FOR
+	SELECT id, title, type,pub_id, price, pubdate, au_id1, au_id2,au_id3
+	FROM TitlesNuevos
+
+
+OPEN CUR1
+
+FETCH NEXT
+FROM CUR1
+INTO @id, @title, @type,@pub_id, @price, @pubdate, @au_id1, @au_id2, @au_id3
+
+WHILE (@@FETCH_STATUS)
+begin
+	BEGIN TRANSACTION
+
+	IF (NOT EXISTS( SELECT *
+					FROM publishers
+					WHERE @pub_id = pub_id))
+		begin
+			INSERT INTO publishers (pub_id)
+			VALUES(@pub_id)
+		end -- del IF
+
+		--SI NO EXISTE EL AUTOR2 LO AGREGO
+	IF (@au_id2 IS NOT NULL) AND (NOT EXISTS( SELECT *
+											  FROM authors
+											  WHERE @au_id2 = au_id))
+		begin
+			INSERT INTO authors (au_id)
+			VALUES(@au2_id)
+
+			INSERT INTO titleauthors (au_id,title_id)
+			VALUES(@au2_id,'zz'+convert(varchar,@id))
+		end -- del IF
+
+		--SI NO EXISTE EL AUTOR3 LO AGREGO
+		IF (@au_id3 IS NOT NULL) AND (NOT EXISTS( SELECT *
+												  FROM authors
+											      WHERE @au_id3 = au_id))
+		begin
+			INSERT INTO authors (au_id)
+			VALUES(@au3_id)
+
+			INSERT INTO titleauthors (au_id,title_id)
+			VALUES(@au3_id,'zz'+convert(varchar,@id))
+		end -- del IF
+
+
+		INSERT INTO titles (title_id,title,type, pub_id,price,pubdate)
+		VALUES('zz'+convert(varchar,@id),@title,@type, @pub_id,price,pubdate)
+
+		IF(@@ERROR = 0) COMMIT TRANSACTION
+		ELSE ROLLBACK TRANSACTION
+
+		FETCH NEXT
+		FROM CUR1
+		INTO @id, @title, @type,@pub_id, @price, @pubdate, @au_id1, @au_id2, @au_id3
+
+end --while
+
+CLOSE CUR1
+DEALLOCATE CUR1
+
+GO
+
+
+
+*****************EJERCICIO 2*****************
+DECLARE curEjer2 cursor
+FOR
+	SELECT IDEmpleado, SUM(severidad)
+	FROM AUSENTISMO 
+	WHERE YEAR(FechaFalta) = 2007
+	GROUP BY IDEmplado 
+
+OPEN cursor curEjer1 
+
+DECLARE @idemp char(5), @sev int
+FETCH next
+	FROM curEjer2
+	INTO @idemp, @sev
+
+while( @@FETCH_STATUS = 0)
+begin	
+	BEGIN TRANSACTION
+	IF (40< @sev)
+	begin
+		DELETE EMPLEADO WHERE IDEmp = @idemp
+		DELETE AUSENTISMO WHERE IDEmpleado = @idemp --DELETE AUSENTISMO WHERE CURRENT OF AUSENTISMO
+	end
+
+	IF (@@ERROR = 0) COMMIT TRANSACTION
+	ELSE ROLLBACK TRANSACTION
+
+	FETCH next
+	FROM curEjer1
+	INTO @idemp, @sev
+end
+close curEjer2
+deallocate curEjer2

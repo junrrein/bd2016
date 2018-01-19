@@ -1,0 +1,29 @@
+**********EJERCICIO 1*************
+--CAMBIAR: AUTHORS = PROVEEDOR, TITLEAUTHOR = PRODPROV, TITLES = PRODUCTO
+--MUESTRO LA MITAD NOMAS CON EL TOP PARA Q NO SE REPITAN
+
+declare @var int
+
+select @var = count(c.title_id)
+from authors a, authors b, titles c 
+where a.au_id<>b.au_id
+		and exists (select * from titleauthor pp where a.au_id=pp.au_id and pp.title_id=c.title_id)
+		and exists (select * from titleauthor pp where b.au_id=pp.au_id and pp.title_id=c.title_id)
+
+
+set @var = @var/2
+select top (@var) a.au_fname, b.au_fname 
+from authors a, authors b, titles c 
+where a.au_id<>b.au_id
+		and exists (select * from titleauthor pp where a.au_id=pp.au_id and pp.title_id=c.title_id)
+		and exists (select * from titleauthor pp where b.au_id=pp.au_id and pp.title_id=c.title_id)
+
+
+**********EJERCICIO 2*************
+SELECT ApeNom
+FROM Proveedor P
+INNER JOIN ProvPrdo PP
+	ON PP.IDProveedor = P.IDProveedor
+GroUP BY IDProv
+HAVING count(PP.IDProducto) = (SELECT count(Prod.IDProd
+			       FROM Producto Prod)

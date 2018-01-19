@@ -1,0 +1,47 @@
+**********EJERCICIO 1*************
+begin transaction
+declare cur cursor for select * from HistoricoInscrip for read only
+
+declare @idcarrera smallint
+declare @idfacultad smallint
+declare @nrodoc varchar
+declare @ape varchar
+declare @nom varchar
+declare @fechainscr datetime
+declare @id smallint
+declare @idasp smallint
+
+open cur
+fetch next from cur into @idcarrera,@idfacultad,@nrodoc,@ape,@nom,@fechainscr
+
+while @@FETCH_STATUS=0
+	begin
+		if (not exists(select *from carrera where id=@idcarrera))
+			begin
+				select @id = MAX(id) from Carrera
+				insert into Carrera(id,idFacultad,Descrip,ADistancia) values(@id+1,@idfacultad,'Carrera desconocida','si')
+			end
+		if (not exists (select *from Aspirante where NroDoc=@nrodoc))
+			begin
+				select @id = MAX(id) from Aspirante
+				insert into Aspirante(id,Ape,Nom,NroDoc) values (@id+1,@ape,@nom,@nrodoc)
+			end
+		set @id=(select MAX(id) from InscripCarr)+1
+		set @idasp=(select id from Aspirante where NroDoc=@nrodoc)
+		insert into InscripCarr(id,idAsp,idCarrera,FechaInscr) values (@id,@idasp,@idcarrera,@fechainscr)
+		fetch next from cur into @idcarrera,@idfacultad,@nrodoc,@ape,@nom,@fechainscr
+	end
+if @@ERROR=0
+	commit transaction
+else
+	rollback transaction
+
+
+**********EJERCICIO 2*************
+SELECT Apellido
+FROM Piloto P
+INNER JOIN Entrenado E
+	ON E.IDPiloto = P.IDPiloto
+GROUP BY Apellido
+HAVING count(E.IDAvion) = (SELECT count(IDAvion)
+			   FROM Avion)

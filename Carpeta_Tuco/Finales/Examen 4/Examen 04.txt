@@ -1,0 +1,29 @@
+**********EJERCICIO 1*************
+SELECT F.IDFact
+FROM Factura F
+INNER JOIN Cliente C
+	ON C.IDCliente = F.IDCliente
+WHERE C.CP = 3000
+GROUP BY F.IDFact
+HAVING 2*(SELECT MIN(Precio)
+	  FROM Articulo A
+	  INNER JOIN Detalle D
+	      ON D.IDArt = A.IDArt
+	  WHERE F.IDFact = D.IDFact) > (SELECT AVG(Precio)
+					FROM Articulo)
+
+**********EJERCICIO 2*************
+SELECT A.Descr
+FROM Articulo A
+WHERE A.IDArt NOT IN (SELECT AA.IDArt
+			  FROM Articulo AA
+			  INNER JOIN Detalle D
+				ON D.IDArt = AA.IDArt
+			  INNER JOIN Factura F
+				ON F.IDFact = D.IDFact
+			  INNER JOIN Cliente C
+				ON C.IDCliente = F.IDCliente
+			  INNER JOIN Localidad L
+				ON L.CP = C.CP
+			  WHERE L.Descr = 'Parana')
+				

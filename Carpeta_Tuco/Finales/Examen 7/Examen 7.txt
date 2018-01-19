@@ -1,0 +1,84 @@
+*********EJERCICIO 1************
+create table lugar (
+	idlugar int not null,
+	nom varchar(40) not null,
+	tipo char not null,
+	id_dep int,
+	constraint pk_lugar primary key(idlugar),
+	constraint fk_idlugar_dep foreign key(id_dep) references lugar(idlugar))
+	
+insert into lugar values(1,'santa fe','P',NULL)--provincia
+insert into lugar values(2,'rosario','L',1) 
+insert into lugar values(3,'san vicente','L',1)
+
+insert into lugar values(4,'E.R','P',NULL) --provincia
+insert into lugar values(5,'La Paz','D',4) --departamento
+insert into lugar values(6,'Bovril','L',4)--ciudad
+insert into lugar values(7,'Sauce','L',4)--ciudad
+
+
+ALTER procedure examen 
+@id int 
+as
+	select L.nom 
+	from lugar P 
+	inner join lugar L 
+		on P.idlugar=L.id_dep  --relaciono la provincia con el departamento
+	where P.idlugar=@id and P.Tipo = 'P' --pregunto el tipo porque puede ser q pase el id de una localidad
+		  and
+		  L.tipo = 'L' --muestro solo las localidades, sino mostraria departamento y distrito
+return
+
+exec examen 4
+
+
+
+*********EJERCICIO 3*************
+CREATE TABLE #TablaAux
+( nombre	varchar(30)	NOT NULL,
+  cantidad	integer		NOT NULL
+)
+
+
+DECLARE cur cursor
+for
+	select name
+	from sysobjects
+	where type = 'u'
+
+DECLARE @nombre varchar(30),
+		@select varchar(100),
+		@aux integer 
+
+OPEN cur
+FETCH NEXT
+FROM cur
+INTO @nombre
+
+WHILE(@@FETCH_STATUS = 0)
+begin
+	set @select = 'SELECT COUNT(*) FROM ' + ' @nombre'
+	set @aux = exec( @select)
+
+	if( 10000 > @aux)
+	begin
+		INSERT INTO #TablaAux
+		VALUES (@nombre, @aux)
+	end
+
+	FETCH NEXT
+	FROM cur
+	INTO @nombre
+end
+
+select nombre "Nombre Tabla", cantidad "Cant. Filas"
+FROM #TablaAux
+
+
+***OTRA FORMA*******
+select SO.name, max(SI.rows)
+ from sysobjects SO
+  inner join sysindexes SI 
+  on SI.id=SO.id 
+  where type='U'
+  group by SO.name
