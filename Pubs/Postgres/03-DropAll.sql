@@ -1,0 +1,10 @@
+﻿drop table sales;
+drop table titleauthor;
+drop table discounts;
+drop table stores;
+drop table authors;
+drop table roysched;
+drop table titles;
+drop table employee;
+drop table jobs;
+drop table publishers;
