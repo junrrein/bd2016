@@ -23,3 +23,10 @@
 ## Restricciones
 
 * Interacción entre PKs y Unique Constraints. ¿Se puede repetir un valor de la columna marcada como Unique si la PK no se repite? Si no se puede, ¿cómo hago para que se pueda? (Lo queremos hacer en Tema 2 - Ejercicio 3 - Tabla asignación)
+
+
+* En bases de datos ACID: Ejemplo para la propiedad de aislamiento?
+
+## Guia 3
+
+* Ejercicio 6.2 - como resolverlo con las condiciones que propone?

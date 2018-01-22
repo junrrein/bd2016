@@ -1,4 +1,4 @@
--- Ejercicio 1
+﻿-- Ejercicio 1
 select au_lname, au_fname, title
 from authors
 inner join titleauthor
@@ -8,14 +8,14 @@ inner join titles
 order by au_lname
 
 -- Ejercicio 2
-select pub_name, fname + ' ' + lname 'empleados' , job_lvl
+select pub_name, fname || ' ' || lname as "empleados" , job_lvl
 from employee
 inner join publishers 
-	on employee.pub_id=publishers.pub_id
+	on employee.pub_id = publishers.pub_id
 where job_lvl > 200
 
 -- Ejercicio 3
-select au_lname, au_fname, sum(qty*price) 'ingresos'
+select au_lname, au_fname, sum(qty*price) as "ingresos"
 from sales s
 inner join titles t
 	on s.title_id = t.title_id
@@ -24,7 +24,7 @@ inner join titleauthor ta
 inner join authors a
 	on ta.au_id = a.au_id
 group by au_lname, au_fname  
-order by 'ingresos' desc
+order by "ingresos" desc
 
 -- Ejercicio 4
 select type
@@ -46,7 +46,6 @@ where exists (select *
 				where t.pub_id = p.pub_id and
 					t.type = 'business')
 
--- Ejercicio 6.2
 select distinct(pub_name)
 from publishers p
 inner join titles t
@@ -57,14 +56,14 @@ where t.type = 'business'
 SELECT title 
 FROM titles left JOIN sales
 ON titles.title_id = sales.title_id
-WHERE YEAR(sales.ord_date) NOT IN (1993, 1994) OR 
+WHERE date_part('year', sales.ord_date) NOT IN (1993, 1994) OR 
 		sales.ord_date is null
 
 select title
 from titles t
 where t.title_id not in (select s.title_id 
 							from sales s
-							where year(s.ord_date) in (1993,1994)) 
+							where date_part('year', s.ord_date) in (1993,1994)) 
 
 -- Ejercicio 8
 select title, pub_name, price
@@ -77,12 +76,12 @@ where price < (select avg(price)
 
 
 -- Ejercicio 9
-select	au_fname 'nombre',
-		au_lname 'apellido',
+select	au_fname as "nombre",
+		au_lname as "apellido",
 		case contract
 			when 1 then 'si'
 			when 0 then 'no'
-		end 'posee contrato?'
+		end as "posee contrato?"
 from authors 
 
 
