@@ -192,6 +192,52 @@ create table guia5.Asignacion
 );
 
 
+INSERT into Provincia
+	VALUES (1,'Santa Fe'), (2,'Buenos Aires'), (3,'Entre Rios');
+
+INSERT into Localidad
+	VALUES (1, 1, 'Franck'), (2,1,'Campana'), (3,1,'Hernandez');
+
+INSERT into Seccion
+	VALUES (1, 'ala norte'), (2,'laboratorio'), (3,'ala sur');
+
+INSERT into Sector
+	VALUES (1, 1, 'cardiologia'), (2,1,'rayos x'), (3,1,'pediatria');
+
+INSERT into Especialidad
+	VALUES (1, 'pediatria'), (2,'cirugia'), (3,'analisis visuales');
+
+INSERT into Persona
+	VALUES ('d', 32839455,'m',1, 1, 1, 1, NULL , NULL ,null, NULL, NULL , NULL , 'matyas primo', NULL , '05/02/1987'),
+				 ('d', 34887512,'m',3, 1, 3, 1, NULL , NULL ,null, NULL, NULL , NULL , 'julian unrrein', NULL , '03/08/1990'),
+				('d', 3481234,'m',3, 1, 3, 1, NULL , NULL ,null, NULL, NULL , NULL , 'julian pepito', NULL , '05/08/1996'),
+				('d', 3487890,'m',3, 1, 3, 1, NULL , NULL ,null, NULL, NULL , NULL , 'julian juberto', NULL , '03/08/1993');
+
+
+INSERT into Medico
+	VALUES (1, 1, 'd', 32839455,'m'), (2,2,'d', 34887512,'m');
+
+INSERT into Empleado
+	VALUES (1, 'd', 3481234,'m', '01/02/2010'), (2, 'd', 3487890,'m', '01/02/2012');
+
+INSERT into Sala
+	VALUES (1, 1, 1, 1, 1, 'sala_A', 34), (2, 1, 2, 2, 2, 'sala_B', 24);
+
+INSERT into Asignacion
+	VALUES (1, 1, 'd', 34887512, 'm', 1, 1, 1, 1, '01/06/2017', '06/06/2017');
+
+INSERT into Trabaja_en
+	VALUES (2, 1, 1, 1);
+
+INSERT into Cargo
+	VALUES (1, 'limpieza'), (2, 'turnos');
+
+INSERT into Historial
+	VALUES (1, '04/05/2016', 2, NULL ), (2, '02/05/2016', 1, NULL );
+
+
+
+
 
 
 
