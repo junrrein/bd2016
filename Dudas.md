@@ -30,3 +30,9 @@
 ## Guia 3
 
 * Ejercicio 6.2 - como resolverlo con las condiciones que propone?
+
+## Guia 4
+
+* Ejercicio 13: No podemos resolverlo porque, al fallar el procedimiento almacenado, se corta la ejecución del batch y no podemos ver el status code después.
+
+* Ejercicio 17: No entendemos bien cuáles son las responsibilidades del procedimiento a implementar. ¿Tiene que chequear si existe el número de pedido? ¿Cuándo habría que hacer un rollback? ¿Qué se hace si el nro de pedido ya está en uso?
