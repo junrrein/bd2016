@@ -101,7 +101,7 @@ declare
 open cur_editorial;
 fetch next from cur_editorial into @pub_id, @venta;
 
-set @mayor_venta = cast(0 as money);
+set @mayor_venta = 0;
 set @menor_venta1 = 10000000;
 set @menor_venta2 = 10000000;
 
@@ -132,6 +132,48 @@ end
 close cur_editorial;
 deallocate cur_editorial;
 
-select @pub_mayor;
-select @pub_menor1;
-select @pub_menor2;
+--select @pub_mayor;
+--select @pub_menor1;
+--select @pub_menor2;
+
+declare cur_empleados cursor for
+	select emp_id, hire_date
+	from employee
+	where pub_id in (@pub_menor1, @pub_menor2) and
+		job_id = 5;
+	
+declare
+	@id_viejo char(9),
+	@fecha_viejo datetime,
+	@id_empleado char(9),
+	@fecha_contratacion datetime;
+	
+open cur_empleados;
+fetch next
+	from cur_empleados
+	into @id_empleado, @fecha_contratacion;
+
+set @id_viejo = @id_empleado;
+set @fecha_viejo = @fecha_contratacion;
+
+while @@FETCH_STATUS = 0
+begin
+	if @fecha_contratacion < @fecha_viejo
+	begin
+		set @fecha_viejo = @fecha_contratacion;
+		set @id_viejo = @id_empleado;
+	end
+	
+	fetch next
+		from cur_empleados
+		into @id_empleado, @fecha_contratacion;
+end;
+
+close cur_empleados;
+deallocate cur_empleados;
+
+select @id_viejo, @fecha_viejo;
+
+--update employee
+--	set pub_id = @pub_mayor
+--	where emp_id = @id_viejo;

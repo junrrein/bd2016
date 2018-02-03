@@ -53,15 +53,12 @@ DECLARE
     cur_editorial CURSOR FOR
     SELECT city
     FROM publishers;
-
-
 BEGIN
   OPEN cur_autor;
 
   LOOP
     FETCH NEXT FROM cur_autor INTO apellido, ciudad_autor;
     EXIT WHEN NOT found;
-
 
     OPEN cur_editorial;
     LOOP
@@ -73,11 +70,9 @@ BEGIN
         RAISE NOTICE 'El autor % reside en la misma ciudad que la editorial que lo edita', apellido;
       END IF;
 
-
     END LOOP;
 
     CLOSE cur_editorial;
-
   END LOOP;
 
   CLOSE cur_autor;
@@ -93,9 +88,101 @@ FROM authors a
   INNER JOIN publishers p ON t.pub_id = p.pub_id
 WHERE a.city = p.city;
 
-select p.pub_id, sum(qty * price)
-	from publishers p
-		inner join titles t on p.pub_id = t.pub_id
-		inner join sales s on t.title_id = s.title_id
-	group by p.pub_id
-	order by sum(qty * price);
+SELECT
+  p.pub_id,
+  sum(qty * price)
+FROM publishers p
+  INNER JOIN titles t ON p.pub_id = t.pub_id
+  INNER JOIN sales s ON t.title_id = s.title_id
+GROUP BY p.pub_id;
+
+-- Ejercicio 6
+
+CREATE OR REPLACE FUNCTION trasladarEmpleado()
+  RETURNS VOID
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+  id_editorial       CHAR(4);
+  ventas_editorial   NUMERIC(10, 2);
+  id_mayor           CHAR(4);
+  id_menor1          CHAR(4);
+  id_menor2          CHAR(4);
+  ventas_mayor       NUMERIC(10, 2) := 0;
+  ventas_menor1      NUMERIC(10, 2) := 10000000;
+  ventas_menor2      NUMERIC(10, 2) := 10000000;
+  id_empleado        CHAR(9);
+  fecha_contratacion DATE;
+  id_viejo           CHAR(9);
+  fecha_viejo        DATE := '1/1/2020';
+
+    cur_editorial CURSOR FOR
+    SELECT
+      p.pub_id,
+      sum(qty * price)
+    FROM publishers p
+      INNER JOIN titles t ON p.pub_id = t.pub_id
+      INNER JOIN sales s ON t.title_id = s.title_id
+    GROUP BY p.pub_id;
+
+    cur_empleado CURSOR FOR
+    SELECT
+      emp_id,
+      hire_date
+    FROM employee
+    WHERE pub_id IN (id_menor1, id_menor2) AND
+          job_lvl = 100;
+BEGIN
+  OPEN cur_editorial;
+
+  LOOP
+    FETCH NEXT FROM cur_editorial INTO id_editorial, ventas_editorial;
+    EXIT WHEN NOT found;
+
+    IF ventas_editorial > ventas_mayor
+    THEN
+      ventas_mayor := ventas_editorial;
+      id_mayor := id_editorial;
+    END IF;
+
+    IF ventas_editorial < ventas_menor1
+    THEN
+      ventas_menor2 := ventas_menor1;
+      id_menor2 := id_menor1;
+      ventas_menor1 := ventas_editorial;
+      id_menor1 := id_editorial;
+    ELSEIF ventas_editorial < ventas_menor2
+      THEN
+        ventas_menor2 := ventas_editorial;
+        id_menor2 := id_editorial;
+    END IF;
+  END LOOP;
+
+  CLOSE cur_editorial;
+
+  --   RAISE NOTICE '%, %, %', id_mayor, id_menor1, id_menor2;
+
+  OPEN cur_empleado;
+
+  LOOP
+    FETCH NEXT FROM cur_empleado INTO id_empleado, fecha_contratacion;
+    EXIT WHEN NOT found;
+
+    IF fecha_contratacion < fecha_viejo
+    THEN
+      id_viejo := id_empleado;
+      fecha_viejo := fecha_contratacion;
+    END IF;
+  END LOOP;
+
+  CLOSE cur_empleado;
+
+  --   RAISE NOTICE '%, %', id_viejo, fecha_viejo;
+  UPDATE employee
+  SET pub_id = id_mayor
+  WHERE emp_id = id_viejo;
+END;
+$$;
+
+SELECT trasladarEmpleado();

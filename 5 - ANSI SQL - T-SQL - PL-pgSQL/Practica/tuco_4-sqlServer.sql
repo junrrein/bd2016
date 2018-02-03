@@ -180,14 +180,17 @@ exec BuscaPrecio 20, @precioBuscado output;
 select @precioBuscado;
 go
 
-create procedure InsertaDetalle
+alter procedure InsertaDetalle
 (
 	@codDetalle int,
 	@numPed int,
 	@codProd int,
-	@cant int
+	@cant int,
+	@estOuput int output
 )
 as
+	set @estOuput = 70;
+
 	declare @precioBuscado float;
 	exec BuscaPrecio @codProd, @precioBuscado output;
 	
@@ -208,10 +211,11 @@ select * from detalle;
 --omitiendo el valor de Cantidad. Capture y muestre el status de retorno del SP.
 
 declare @estado int;
-exec @estado = InsertaDetalle
+exec InsertaDetalle
 	@codDetalle = 1540,
 	@numPed = 120,
-	@codProd = 10;
+	@codProd = 10,
+	@estOutput = @estado output;
 print @estado;
 go
 
