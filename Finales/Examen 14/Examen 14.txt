@@ -1,7 +1,0 @@
-**********EJERCICIO 2************
-CREATE PROCEDURE sp_infoUsers
-@cant int
-AS
-select top(@cant) *
-from sysusers
-RETURN
