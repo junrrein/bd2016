@@ -98,6 +98,28 @@ SELECT pg_sleep(10);
 ROLLBACK;
 
 ---------------------------------------------------------------------------------------------
+-------------------------------------- Sesion 1 -Ejemplo RU3 ---------------------------------
+---------------------------------------------------------------------------------------------
+
+-- Isolation Level -> Read-Uncommitted
+-- Situación a evaluar -> Non-repeatable reads
+BEGIN ISOLATION LEVEL READ COMMITTED;
+
+SELECT IdAsiento
+FROM VueloAsiento
+WHERE idVuelo = 'GA4561B' AND
+      estadoAsiento = 'D';
+
+SELECT pg_sleep(20);
+
+SELECT IdAsiento
+FROM VueloAsiento
+WHERE idVuelo = 'GA4561B' AND
+      estadoAsiento = 'D';
+
+COMMIT;
+
+---------------------------------------------------------------------------------------------
 -------------------------------------- Sesion 1 -Ejemplo RR1 ---------------------------------
 ---------------------------------------------------------------------------------------------
 
