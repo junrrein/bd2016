@@ -1,85 +1,132 @@
 -- Ejercicio 1
 
-create table Proveedor
+CREATE TABLE Proveedor
 (
-	IDProveedor int primary key,
-	RazonSocial varchar(50) not null
+  IDProveedor INT PRIMARY KEY,
+  RazonSocial VARCHAR(50) NOT NULL
 );
 
-create table Componente
+CREATE TABLE Componente
 (
-	IDComponente int primary key,
-	Componente varchar(40) not null
+  IDComponente INT PRIMARY KEY,
+  Componente   VARCHAR(40) NOT NULL
 );
 
-create table ProvComp
+CREATE TABLE ProvComp
 (
-	IDProveedor int references Proveedor,
-	IDComponente int references Componente,
-	
-	constraint pk_provcomp
-		primary key (IDProveedor, IDComponente)
+  IDProveedor  INT REFERENCES Proveedor,
+  IDComponente INT REFERENCES Componente,
+
+  CONSTRAINT pk_provcomp
+  PRIMARY KEY (IDProveedor, IDComponente)
 );
 
-insert into Proveedor
-values (1, 'Matias el seductor');
-insert into Proveedor
-values (2, 'Luis el destructor');
-insert into Proveedor
-values (3, 'Pablo el calculador');
+INSERT INTO Proveedor
+VALUES (1, 'Matias el seductor');
+INSERT INTO Proveedor
+VALUES (2, 'Luis el destructor');
+INSERT INTO Proveedor
+VALUES (3, 'Pablo el calculador');
 
-insert into Componente
-values (1, 'Tuerca')
-insert into Componente
-values (2, 'Tornillo')
-insert into Componente
-values (3, 'Clavo')
-insert into Componente
-values (4, 'Bulon')
+INSERT INTO Componente
+VALUES (1, 'Tuerca');
+INSERT INTO Componente
+VALUES (2, 'Tornillo');
+INSERT INTO Componente
+VALUES (3, 'Clavo');
+INSERT INTO Componente
+VALUES (4, 'Bulon');
 
-insert into ProvComp values (1, 1);
-insert into ProvComp values (1, 2);
-insert into ProvComp values (1, 3);
-insert into ProvComp values (1, 4);
-insert into ProvComp values (2, 1);
-insert into ProvComp values (2, 2);
-insert into ProvComp values (2, 4);
-insert into ProvComp values (3, 2);
-insert into ProvComp values (3, 3);
+INSERT INTO ProvComp VALUES (1, 1);
+INSERT INTO ProvComp VALUES (1, 2);
+INSERT INTO ProvComp VALUES (1, 3);
+INSERT INTO ProvComp VALUES (1, 4);
+INSERT INTO ProvComp VALUES (2, 1);
+INSERT INTO ProvComp VALUES (2, 2);
+INSERT INTO ProvComp VALUES (2, 4);
+INSERT INTO ProvComp VALUES (3, 2);
+INSERT INTO ProvComp VALUES (3, 3);
 
 --Obtener la razón social de todos los proveedores que, como mínimo,
 --proveen todos los componentes que provee el proveedor con IDProveedor 2.
 
-(select count(c.IDComponente)
-from Componente c
-	inner join ProvComp pc
-		on c.IDComponente = pc.IDComponente
-	inner join Proveedor p
-		on pc.IDProveedor = p.IDProveedor
-where p.IDProveedor = 2)
+(SELECT count(c.IDComponente)
+ FROM Componente c
+   INNER JOIN ProvComp pc
+     ON c.IDComponente = pc.IDComponente
+   INNER JOIN Proveedor p
+     ON pc.IDProveedor = p.IDProveedor
+ WHERE p.IDProveedor = 2);
 
-select p2.IDProveedor, p2.RazonSocial
-from Proveedor p2
-	inner join ProvComp pc2
-		on p2.IDProveedor = pc2.IDProveedor
-where pc2.IDComponente in (select c.IDComponente
-							from Componente c
-								inner join ProvComp pc
-									on c.IDComponente = pc.IDComponente
-								inner join Proveedor p
-									on pc.IDProveedor = p.IDProveedor
-							where p.IDProveedor = 2)
-group by p2.IDProveedor, p2.RazonSocial
-having COUNT(*) = (select count(c.IDComponente)
-					from Componente c
-						inner join ProvComp pc
-							on c.IDComponente = pc.IDComponente
-						inner join Proveedor p
-							on pc.IDProveedor = p.IDProveedor
-					where p.IDProveedor = 2)
-					
+SELECT
+  p2.IDProveedor,
+  p2.RazonSocial
+FROM Proveedor p2
+  INNER JOIN ProvComp pc2
+    ON p2.IDProveedor = pc2.IDProveedor
+WHERE pc2.IDComponente IN (SELECT c.IDComponente
+                           FROM Componente c
+                             INNER JOIN ProvComp pc
+                               ON c.IDComponente = pc.IDComponente
+                             INNER JOIN Proveedor p
+                               ON pc.IDProveedor = p.IDProveedor
+                           WHERE p.IDProveedor = 2)
+GROUP BY p2.IDProveedor, p2.RazonSocial
+HAVING COUNT(*) = (SELECT count(c.IDComponente)
+                   FROM Componente c
+                     INNER JOIN ProvComp pc
+                       ON c.IDComponente = pc.IDComponente
+                     INNER JOIN Proveedor p
+                       ON pc.IDProveedor = p.IDProveedor
+                   WHERE p.IDProveedor = 2);
+
 -- Ejercicio 2
 
-alter table sales
-drop constraint UPKCL_sales;
+ALTER TABLE sales
+  DROP CONSTRAINT UPKCL_sales;
+
+CREATE OR REPLACE FUNCTION fn_tr_ejer2()
+  RETURNS TRIGGER
+LANGUAGE plpgsql
+AS
+$$
+DECLARE
+  cantidad SMALLINT;
+BEGIN
+  SELECT qty
+  INTO cantidad
+  FROM sales
+  WHERE stor_id = NEW.stor_id AND
+        ord_num = NEW.ord_num AND
+        title_id = NEW.title_id;
+
+  IF cantidad IS NULL
+  THEN
+    RETURN NEW;
+  END IF;
+
+  UPDATE sales
+  SET qty    = cantidad + new.qty,
+    ord_date = new.ord_date,
+    payterms = new.payterms
+  WHERE stor_id = NEW.stor_id AND
+        ord_num = NEW.ord_num AND
+        title_id = NEW.title_id;
+
+  RETURN NULL;
+END;
+$$;
+
+CREATE TRIGGER tr_ejer2
+  BEFORE INSERT
+  ON sales
+  FOR EACH ROW
+EXECUTE PROCEDURE fn_tr_ejer2();
+
+SELECT *
+FROM sales
+WHERE stor_id = '7067' AND ord_num = 'P2121';
+
+INSERT INTO sales
+VALUES ('7067', 'P2121', current_timestamp, 10, 'ON invoice', 'PC8888');
 
