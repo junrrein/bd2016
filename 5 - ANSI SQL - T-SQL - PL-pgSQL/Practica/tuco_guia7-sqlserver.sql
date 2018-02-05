@@ -70,8 +70,8 @@ ON titles
 AFTER INSERT
 AS
 BEGIN
-  DECLARE @pub_id CHAR(4);
-  SELECT @pub_id = pub_id
+  DECLARE @pub_id CHAR(4); -- FIXME: Puede haber varios pub_id distintos en inserted!
+  SELECT @pub_id = pub_id  -- Hay que iterar con un cursor sobre los distinct(pub_id).
   FROM inserted;
 
   DECLARE @ventas MONEY;
