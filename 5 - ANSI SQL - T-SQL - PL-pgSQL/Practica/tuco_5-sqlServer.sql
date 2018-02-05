@@ -5,11 +5,9 @@ declare cursor_precios cursor for
 	where pub_id = '0736'
 for update;
 
-
 declare @precio money;
 
 open cursor_precios;
-
 fetch next from cursor_precios into @precio
 
 while @@fetch_status = 0
@@ -31,7 +29,6 @@ deallocate cursor_precios;
 select price 
 	from titles 
 	where pub_id = '0736';
-
 
 -- Ejercicio 3
 

@@ -98,9 +98,9 @@ SELECT
     THEN 'si'
   WHEN 0
     THEN 'no'
-  END      AS "posee contrato?"
+  END
+           AS "posee contrato?"
 FROM authors;
-
 
 -- Ejercicio 10
 SELECT

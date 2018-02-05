@@ -6,7 +6,7 @@ CREATE OR REPLACE FUNCTION test
 LANGUAGE plpgsql
 AS
 $$
-DECLARE apellido VARCHAR(40) :='pepe';
+DECLARE apellido VARCHAR(40);
 BEGIN
   RETURN (SELECT apellido IS NULL);
 END;
@@ -40,7 +40,7 @@ BEGIN
 END;
 $$;
 
-SELECT PublicacionesBusiness('0877')
+SELECT PublicacionesBusiness('0877');
 
 -- Ejercicio 4
 
@@ -52,7 +52,7 @@ AS
 $$
 DECLARE
   precio  MONEY;
-  mensaje VARCHAR(100) := 'pepino';
+  mensaje VARCHAR(100);
 BEGIN
   precio := (SELECT price
              FROM titles
@@ -108,8 +108,8 @@ SELECT VerVenta('7067' :: CHAR(4), -- cod_almacen
                 'P2121' :: VARCHAR(20), -- num_orden
                 40 :: SMALLINT); -- cantidad
 
-SELECT VerVenta(cod_almacen := '7067' :: CHAR(4),
-                num_orden := 'P2121' :: VARCHAR(20),
+SELECT VerVenta(cod_almacen := '7067',
+                num_orden := 'P2121',
                 cantidad := 40 :: SMALLINT);
 
 -- Ejercicio 15
@@ -155,4 +155,4 @@ BEGIN
 END;
 $$;
 
-select insertarEditoriales();
+SELECT insertarEditoriales();
